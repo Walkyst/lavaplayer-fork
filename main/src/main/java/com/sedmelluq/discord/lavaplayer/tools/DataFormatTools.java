@@ -43,7 +43,7 @@ public class DataFormatTools {
     return null;
   }
 
-  public static String extractBetween(String haystack, TextRange[] candidates) {
+  public static String extractBetween(String haystack, TextRange... candidates) {
     for (TextRange candidate : candidates) {
       String result = extractBetween(haystack, candidate.start, candidate.end);
 

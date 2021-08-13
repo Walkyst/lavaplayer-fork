@@ -1,6 +1,7 @@
 package com.sedmelluq.discord.lavaplayer.source.soundcloud;
 
 import com.sedmelluq.discord.lavaplayer.tools.DataFormatTools;
+import com.sedmelluq.discord.lavaplayer.tools.DataFormatTools.TextRange;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
@@ -36,6 +37,10 @@ public class DefaultSoundCloudHtmlDataLoader implements SoundCloudHtmlDataLoader
   }
 
   protected String extractJsonFromHtml(String html) {
-    return DataFormatTools.extractBetween(html, "catch(e){}})},", ");</script>");
+    String startFormat = "\"hydratable\":\"%s\",\"data\":";
+    String end = "}];</script>";
+    String startTrack = String.format(startFormat, "sound");
+    String startPlaylist = String.format(startFormat, "playlist");
+    return DataFormatTools.extractBetween(html, new TextRange(startTrack, end), new TextRange(startPlaylist, end));
   }
 }
