@@ -135,6 +135,8 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
 
       if (unplayableReason.contains("Playback on other websites has been disabled by the video owner")) {
         return InfoStatus.NON_EMBEDDABLE;
+      } else if (unplayableReason.contains("Sorry, this content is age-restricted")) {
+        return InfoStatus.CONTENT_CHECK_REQUIRED;
       }
 
       throw new FriendlyException(unplayableReason, COMMON, null);
@@ -231,7 +233,7 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
   protected JsonBrowser loadTrackInfoFromMainPage(HttpInterface httpInterface, String videoId) throws IOException {
     String url = WATCH_URL_PREFIX + videoId + "&pbj=1&hl=en";
 
-    try (CloseableHttpResponse response = httpInterface.execute(new HttpGet(url))) {
+    try (CloseableHttpResponse response = httpInterface.execute(new HttpPost(url))) {
       return processResponse(response);
     }
   }
@@ -253,7 +255,7 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
               .get("url")
               .text();
       if (fetchedContentVerifiedLink != null) {
-        return loadTrackInfoFromMainPage(httpInterface, fetchedContentVerifiedLink.substring(9));
+        return loadTrackInfoFromMainPage(httpInterface, fetchedContentVerifiedLink.replace("/watch?v=", ""));
       }
 
       log.error("Did not receive requested content verified link on track {} response: {}", videoId, json);
