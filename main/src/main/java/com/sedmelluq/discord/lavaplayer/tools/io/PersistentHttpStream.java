@@ -51,6 +51,20 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
   }
 
   /**
+   * @param httpInterface The HTTP interface to use for requests
+   * @param contentUrl The URL of the resource
+   * @param contentLength The length of the resource in bytes
+   * @param maxSkipDistance The maximum skip distance in bytes
+   */
+  public PersistentHttpStream(HttpInterface httpInterface, URI contentUrl, Long contentLength, long maxSkipDistance) {
+    super(contentLength == null ? Units.CONTENT_LENGTH_UNKNOWN : contentLength, maxSkipDistance);
+
+    this.httpInterface = httpInterface;
+    this.contentUrl = contentUrl;
+    this.position = 0;
+  }
+
+  /**
    * Connect and return status code or return last status code if already connected. This causes the internal status
    * code checker to be disabled, so non-success status codes will be returned instead of being thrown as they would
    * be otherwise.

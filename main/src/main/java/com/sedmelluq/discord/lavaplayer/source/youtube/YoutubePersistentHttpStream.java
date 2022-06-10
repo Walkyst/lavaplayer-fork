@@ -18,11 +18,13 @@ public class YoutubePersistentHttpStream extends PersistentHttpStream {
    * @param contentLength The length of the resource in bytes
    */
   public YoutubePersistentHttpStream(HttpInterface httpInterface, URI contentUrl, long contentLength) {
-    super(httpInterface, contentUrl, contentLength);
+    super(httpInterface, contentUrl, contentLength, 0L);
   }
 
   @Override
   protected URI getConnectUrl() {
+    //System.out.printf("getConnectUrl() with position %d, clen %d%n", position, contentLength);
+
     if (position > 0) {
       try {
         return new URIBuilder(contentUrl).addParameter("range", position + "-" + contentLength).build();
