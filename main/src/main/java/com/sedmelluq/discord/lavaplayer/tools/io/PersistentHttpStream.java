@@ -3,12 +3,6 @@ package com.sedmelluq.discord.lavaplayer.tools.io;
 import com.sedmelluq.discord.lavaplayer.tools.Units;
 import com.sedmelluq.discord.lavaplayer.track.info.AudioTrackInfoBuilder;
 import com.sedmelluq.discord.lavaplayer.track.info.AudioTrackInfoProvider;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -17,6 +11,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.getHeaderValue;
 import static com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools.isSuccessWithContent;
@@ -34,7 +35,7 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
   protected final URI contentUrl;
   private int lastStatusCode;
   private CloseableHttpResponse currentResponse;
-  private InputStream currentContent;
+  protected InputStream currentContent;
   protected long position;
 
   /**
@@ -99,7 +100,7 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
     return request;
   }
 
-  private void connect(boolean skipStatusCheck) throws IOException {
+  protected void connect(boolean skipStatusCheck) throws IOException {
     if (currentResponse == null) {
       for (int i = 1; i >= 0; i--) {
         if (attemptConnect(skipStatusCheck, i > 0)) {
@@ -166,7 +167,7 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
     return internalRead(true);
   }
 
-  private int internalRead(byte[] b, int off, int len, boolean attemptReconnect) throws IOException {
+  protected int internalRead(byte[] b, int off, int len, boolean attemptReconnect) throws IOException {
     connect(false);
 
     try {
@@ -186,7 +187,7 @@ public class PersistentHttpStream extends SeekableInputStream implements AutoClo
     return internalRead(b, off, len, true);
   }
 
-  private long internalSkip(long n, boolean attemptReconnect) throws IOException {
+  protected long internalSkip(long n, boolean attemptReconnect) throws IOException {
     connect(false);
 
     try {
