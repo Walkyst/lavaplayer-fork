@@ -14,11 +14,13 @@ dependencies {
   implementation("org.mozilla:rhino-engine:1.7.14")
   api("org.slf4j:slf4j-api:1.7.25")
 
-  api("org.apache.httpcomponents:httpclient:4.5.10")
+  api("org.apache.httpcomponents:httpclient:4.5.13")
   implementation("commons-io:commons-io:2.6")
+  
+  implementation("commons-codec:commons-codec:1.15")
 
   api("com.fasterxml.jackson.core:jackson-core:2.10.0")
-  api("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+  api("com.fasterxml.jackson.core:jackson-databind:2.13.3")
 
   implementation("org.jsoup:jsoup:1.12.1")
   implementation("net.iharder:base64:2.3.9")
