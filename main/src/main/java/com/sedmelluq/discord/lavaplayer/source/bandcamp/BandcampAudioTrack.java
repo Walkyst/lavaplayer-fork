@@ -2,6 +2,8 @@ package com.sedmelluq.discord.lavaplayer.source.bandcamp;
 
 import com.sedmelluq.discord.lavaplayer.container.mp3.Mp3AudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
 import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
@@ -43,6 +45,11 @@ public class BandcampAudioTrack extends DelegatedAudioTrack {
       log.debug("Loading Bandcamp track page from URL: {}", trackInfo.identifier);
 
       String trackMediaUrl = getTrackMediaUrl(httpInterface);
+
+      if (trackMediaUrl == null) {
+        throw new FriendlyException("No supported formats for this track", Severity.SUSPICIOUS, null);
+      }
+
       log.debug("Starting Bandcamp track from URL: {}", trackMediaUrl);
 
       try (PersistentHttpStream stream = new PersistentHttpStream(httpInterface, new URI(trackMediaUrl), null)) {
