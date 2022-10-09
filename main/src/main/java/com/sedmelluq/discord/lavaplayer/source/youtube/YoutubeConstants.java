@@ -8,7 +8,7 @@ public class YoutubeConstants {
     static final String BASE_URL = YOUTUBE_API_ORIGIN + "/youtubei/v1";
     static final String INNERTUBE_API_KEY = "AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w";
     static final String CLIENT_ANDROID_NAME = "ANDROID";
-    static final String CLIENT_ANDROID_VERSION = "17.29.34";
+    static final String CLIENT_ANDROID_VERSION = "17.31.35";
     static final String CLIENT_ANDROID_SDK_VERSION = "30";
     static final String CLIENT_WEB_NAME = "WEB";
     static final String CLIENT_WEB_VERSION = "2.20220801.00.00";
@@ -38,7 +38,7 @@ public class YoutubeConstants {
     static final String MUSIC_BASE_URL = "https://music.youtube.com/youtubei/v1";
     static final String MUSIC_INNERTUBE_API_KEY = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
     static final String MUSIC_CLIENT_NAME = "WEB_REMIX";
-    static final String MUSIC_CLIENT_VERSION = "0.1";
+    static final String MUSIC_CLIENT_VERSION = "1.20220727.01.00"; // 0.1
     static final String MUSIC_BASE_PAYLOAD = "{\"context\":{\"client\":{\"clientName\":\"" + MUSIC_CLIENT_NAME + "\",\"clientVersion\":\"" + MUSIC_CLIENT_VERSION + "\"}},";
 
     static final String MUSIC_SEARCH_URL = MUSIC_BASE_URL + "/search?key=" + MUSIC_INNERTUBE_API_KEY;
