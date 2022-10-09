@@ -15,7 +15,7 @@ public class YoutubeConstants {
     static final String CLIENT_TVHTML5_NAME = "TVHTML5_SIMPLY_EMBEDDED_PLAYER";
     static final String CLIENT_TVHTML5_VERSION = "2.0";
     static final String CLIENT_SCREEN_EMBED = "EMBED";
-    static final String BASE_PAYLOAD = "{\"context\":{\"client\":{\"clientName\":\"%s\",\"clientVersion\":\"%s\",\"osName\":\"Android\",\"osVersion\":\"12\",\"userAgent\":\"com.google.android.youtube/17.31.35 (Linux; U; Android 12) gzip\"";
+    static final String BASE_PAYLOAD = "{\"context\":{\"client\":{\"clientName\":\"%s\",\"clientVersion\":\"%s\",\"osName\":\"Android\",\"osVersion\":\"11\",\"userAgent\":\"com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip\"";
     static final String SDK_VERSION_PART_BASE_PAYLOAD = ",\"androidSdkVersion\":" + CLIENT_ANDROID_SDK_VERSION;
     static final String DEFAULT_BASE_PAYLOAD = String.format(BASE_PAYLOAD, CLIENT_ANDROID_NAME, CLIENT_ANDROID_VERSION) + SDK_VERSION_PART_BASE_PAYLOAD;
     static final String SCREEN_PART_PAYLOAD = ",\"screenDensityFloat\":1,\"screenHeightPoints\":1080,\"screenPixelDensity\":1,\"screenWidthPoints\":1920";
