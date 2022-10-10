@@ -4,8 +4,12 @@ import com.sedmelluq.discord.lavaplayer.tools.http.HttpContextFilter;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BaseYoutubeHttpContextFilter implements HttpContextFilter {
+  private static final Logger log = LoggerFactory.getLogger(BaseYoutubeHttpContextFilter.class);
+
   public static final String androidClientContext = "android-client-req";
 
   @Override
@@ -24,6 +28,7 @@ public class BaseYoutubeHttpContextFilter implements HttpContextFilter {
     request.addHeader("Cookie", "CONSENT=YES+cb.20210328-17-p0.en+FX+471");
 
     if (context.getAttribute(androidClientContext) == Boolean.TRUE) {
+      log.info("Applying android user-agent header.");
       request.setHeader("user-agent", "com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip");
     }
   }
