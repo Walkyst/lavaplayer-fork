@@ -12,6 +12,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +21,12 @@ import java.net.URISyntaxException;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
 
 public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
+  private static final Logger log = LoggerFactory.getLogger(BaseYoutubeHttpContextFilter.class);
+
+
   private static final String ATTRIBUTE_RESET_RETRY = "isResetRetry";
+  public static final String ATTRIBUTE_ANDROID_REQUEST = "android-client-req";
+
   private static final HttpContextRetryCounter retryCounter = new HttpContextRetryCounter("yt-token-retry");
 
   private YoutubeAccessTokenTracker tokenTracker;
@@ -57,6 +64,11 @@ public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
     if (tokenTracker.isTokenFetchContext(context)) {
       // Used for fetching access token, let's not recurse.
       return;
+    }
+
+    if (context.getAttribute(ATTRIBUTE_ANDROID_REQUEST) == Boolean.TRUE) {
+      log.info("Applying android user-agent header.");
+      request.setHeader("user-agent", "com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip");
     }
 
     String accessToken = tokenTracker.getAccessToken();
