@@ -124,6 +124,8 @@ public class YoutubeSignatureCipherManager implements YoutubeSignatureResolver {
       }
     }
 
+    log.info("nFunction resolved");
+
     try {
       return uri.setParameter("ratebypass", "yes").build();
     } catch (URISyntaxException e) {
@@ -243,6 +245,7 @@ public class YoutubeSignatureCipherManager implements YoutubeSignatureResolver {
     YoutubeSignatureCipher cipherKey = new YoutubeSignatureCipher();
 
     if (nFunction.find()) {
+      log.info("nFunction match");
       cipherKey.setNFunction(nFunction.group(0));
     } else {
       // Don't throw any exceptions here since if n function is not extracted audio still can be played
