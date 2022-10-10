@@ -69,6 +69,7 @@ public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
     if (context.getAttribute(ATTRIBUTE_ANDROID_REQUEST) == Boolean.TRUE) {
       log.info("Applying android user-agent header.");
       request.setHeader("user-agent", "com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip");
+      context.removeAttribute(ATTRIBUTE_RESET_RETRY);
     }
 
     String accessToken = tokenTracker.getAccessToken();
