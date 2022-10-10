@@ -20,8 +20,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.BROWSE_CONTINUATION_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.BROWSE_PLAYLIST_PAYLOAD;
 import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.BROWSE_URL;
 import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.WATCH_URL_PREFIX;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
@@ -38,7 +36,10 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
   public AudioPlaylist load(HttpInterface httpInterface, String playlistId, String selectedVideoId,
                             Function<AudioTrackInfo, AudioTrack> trackFactory) {
     HttpPost post = new HttpPost(BROWSE_URL);
-    StringEntity payload = new StringEntity(String.format(BROWSE_PLAYLIST_PAYLOAD, playlistId), "UTF-8");
+    String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
+            .withRootBrowseId(playlistId)
+            .toJsonString();
+    StringEntity payload = new StringEntity(clientJson, "UTF-8");
     post.setEntity(payload);
     try (CloseableHttpResponse response = httpInterface.execute(post)) {
       HttpClientTools.assertSuccessWithContent(response, "playlist response");
@@ -89,7 +90,10 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
     // Also load the next pages, each result gives us a JSON with separate values for list html and next page loader html
     while (continuationsToken != null && ++loadCount < pageCount) {
       HttpPost post = new HttpPost(BROWSE_URL);
-      StringEntity payload = new StringEntity(String.format(BROWSE_CONTINUATION_PAYLOAD, continuationsToken), "UTF-8");
+      String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
+              .withRootContinuation(continuationsToken)
+              .toJsonString();
+      StringEntity payload = new StringEntity(clientJson, "UTF-8");
       post.setEntity(payload);
       try (CloseableHttpResponse response = httpInterface.execute(post)) {
         HttpClientTools.assertSuccessWithContent(response, "playlist response");

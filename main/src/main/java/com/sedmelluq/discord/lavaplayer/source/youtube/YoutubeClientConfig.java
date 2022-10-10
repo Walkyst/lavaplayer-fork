@@ -24,7 +24,11 @@ public class YoutubeClientConfig {
             .withClientName("WEB")
             .withClientVersion("2.20220801.00.00");
 
-    // Payloads
+    public static YoutubeClientConfig MUSIC = new YoutubeClientConfig()
+            .withClientName("WEB_REMIX")
+            .withClientVersion("1.20220727.01.00");
+
+    // TODO: Maybe I should avoid creating a function per key-value and use a generic method?
 
     private final Map<String, Object> root;
 
@@ -55,6 +59,36 @@ public class YoutubeClientConfig {
         return this;
     }
 
+    public YoutubeClientConfig withRootPlaylistId(String playlistId) {
+        root.put("playlistId", playlistId);
+        return this;
+    }
+
+    public YoutubeClientConfig withRootQuery(String query) {
+        root.put("query", query);
+        return this;
+    }
+
+    public YoutubeClientConfig withRootParams(String params) {
+        root.put("params", params);
+        return this;
+    }
+
+    public YoutubeClientConfig withRootBrowseId(String browseId) {
+        root.put("browseId", "VL" + browseId);
+        return this;
+    }
+
+    public YoutubeClientConfig withRootContinuation(String continuation) {
+        root.put("continuation", continuation);
+        return this;
+    }
+
+    public YoutubeClientConfig withRoot(String key, Object value) {
+        root.put(key, value);
+        return this;
+    }
+
     public YoutubeClientConfig withClientName(String clientName) {
         return putClient("clientName", clientName);
     }
@@ -81,6 +115,10 @@ public class YoutubeClientConfig {
 
     public YoutubeClientConfig withClientScreen(String screen) {
         return putClient("clientScreen", screen);
+    }
+
+    public YoutubeClientConfig withClient(String key, Object value) {
+        return putClient(key, value);
     }
 
     public YoutubeClientConfig withClientDefaultScreenParameters() {
