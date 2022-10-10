@@ -10,11 +10,11 @@ public class YoutubeClientConfig {
     // Clients
     public static YoutubeClientConfig ANDROID_CLIENT = new YoutubeClientConfig()
             .withClientName("ANDROID")
-            .withClientVersion("17.31.35")
+            .withClientVersion("17.39.35") // .31.35
             .withClientAndroidSdkVersion(30)
             .withClientOsName("Android")
             .withClientOsVersion("11")
-            .withClientUserAgent("com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip");
+            .withClientUserAgent("com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip");
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
             .withClientName("TVHTML5_SIMPLY_EMBEDDED_PLAYER")
