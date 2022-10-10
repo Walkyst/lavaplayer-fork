@@ -206,6 +206,7 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
     } else if (infoStatus == InfoStatus.NON_EMBEDDABLE) {
       // Used when age restriction bypass failed, if we have valid auth then most likely this request will be successful
       config = YoutubeClientConfig.ANDROID_CLIENT.copy();//.withClientDefaultScreenParameters()
+      httpInterface.getContext().setAttribute(BaseYoutubeHttpContextFilter.androidClientContext, true);
     } else if (infoStatus == InfoStatus.REQUIRES_LOGIN) {
       // Age restriction bypass
       config = YoutubeClientConfig.TV_EMBEDDED.copy()
@@ -218,6 +219,7 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
               .withClientScreen("EMBED")
               .withThirdPartyEmbedUrl("https://google.com");
               //.withClientDefaultScreenParameters();
+      httpInterface.getContext().setAttribute(BaseYoutubeHttpContextFilter.androidClientContext, true);
     }
 
     String payload = config.withRootRacyCheckOk(true)

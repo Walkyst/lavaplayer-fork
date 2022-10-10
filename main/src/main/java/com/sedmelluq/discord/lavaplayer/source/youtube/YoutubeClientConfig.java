@@ -13,8 +13,8 @@ public class YoutubeClientConfig {
             .withClientVersion("17.39.35") // .31.35
             .withClientAndroidSdkVersion(30)
             .withClientOsName("Android")
-            .withClientOsVersion("11")
-            .withClientUserAgent("com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip"); // perhaps this should be set in the headers?
+            .withClientOsVersion("11");
+            //.withClientUserAgent("com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip"); // perhaps this should be set in the headers?
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
             .withClientName("TVHTML5_SIMPLY_EMBEDDED_PLAYER")
