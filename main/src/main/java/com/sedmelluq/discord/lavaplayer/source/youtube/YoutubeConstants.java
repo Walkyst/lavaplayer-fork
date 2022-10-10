@@ -10,24 +10,15 @@ public class YoutubeConstants {
     static final String CLIENT_ANDROID_NAME = "ANDROID";
     static final String CLIENT_ANDROID_VERSION = "17.31.35";
     static final String CLIENT_ANDROID_SDK_VERSION = "30";
-    static final String CLIENT_WEB_NAME = "WEB";
-    static final String CLIENT_WEB_VERSION = "2.20220801.00.00";
-    static final String CLIENT_TVHTML5_NAME = "TVHTML5_SIMPLY_EMBEDDED_PLAYER";
-    static final String CLIENT_TVHTML5_VERSION = "2.0";
-    static final String CLIENT_SCREEN_EMBED = "EMBED";
     static final String BASE_PAYLOAD = "{\"context\":{\"client\":{\"clientName\":\"%s\",\"clientVersion\":\"%s\",\"osName\":\"Android\",\"osVersion\":\"11\",\"userAgent\":\"com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip\"";
     static final String SDK_VERSION_PART_BASE_PAYLOAD = ",\"androidSdkVersion\":" + CLIENT_ANDROID_SDK_VERSION;
     static final String DEFAULT_BASE_PAYLOAD = String.format(BASE_PAYLOAD, CLIENT_ANDROID_NAME, CLIENT_ANDROID_VERSION) + SDK_VERSION_PART_BASE_PAYLOAD;
     static final String SCREEN_PART_PAYLOAD = ",\"screenDensityFloat\":1,\"screenHeightPoints\":1080,\"screenPixelDensity\":1,\"screenWidthPoints\":1920";
-    static final String EMBED_PART_PAYLOAD = ",\"clientScreen\":\"" + CLIENT_SCREEN_EMBED + "\"},\"thirdParty\":{\"embedUrl\":\"https://google.com\"";
     static final String CLOSE_BASE_PAYLOAD = "}},";
-    static final String CLOSE_PLAYER_PAYLOAD = "\"racyCheckOk\":true,\"contentCheckOk\":true,\"videoId\":\"%s\",\"playbackContext\":{\"contentPlaybackContext\":{\"signatureTimestamp\":%s}}}";
 
     static final String SEARCH_URL = BASE_URL + "/search?key=" + INNERTUBE_API_KEY;
     static final String SEARCH_PAYLOAD = DEFAULT_BASE_PAYLOAD + SCREEN_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + "\"query\":\"%s\",\"params\":\"EgIQAQ==\"}";
     static final String PLAYER_URL = BASE_URL + "/player";
-    static final String PLAYER_PAYLOAD = DEFAULT_BASE_PAYLOAD + SCREEN_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + CLOSE_PLAYER_PAYLOAD;
-    static final String PLAYER_EMBED_PAYLOAD = DEFAULT_BASE_PAYLOAD + SCREEN_PART_PAYLOAD + EMBED_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + CLOSE_PLAYER_PAYLOAD;
     static final String BROWSE_URL = BASE_URL + "/browse";
     static final String BROWSE_PLAYLIST_PAYLOAD = DEFAULT_BASE_PAYLOAD + SCREEN_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + "\"browseId\":\"VL%s\"}";
     static final String BROWSE_CONTINUATION_PAYLOAD = DEFAULT_BASE_PAYLOAD + SCREEN_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + "\"continuation\":\"%s\"}";

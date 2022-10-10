@@ -23,6 +23,8 @@ dependencies {
   implementation("org.jsoup:jsoup:1.12.1")
   implementation("net.iharder:base64:2.3.9")
 
+  implementation("com.grack:nanojson:1.7")
+
   testImplementation("org.codehaus.groovy:groovy:2.5.5")
   testImplementation("org.spockframework:spock-core:1.2-groovy-2.5")
   testImplementation("ch.qos.logback:logback-classic:1.2.3")

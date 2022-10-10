@@ -16,18 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.BASE_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLIENT_TVHTML5_NAME;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLIENT_TVHTML5_VERSION;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLIENT_WEB_NAME;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLIENT_WEB_VERSION;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLOSE_BASE_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.CLOSE_PLAYER_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.EMBED_PART_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.PLAYER_EMBED_PAYLOAD;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.PLAYER_PAYLOAD;
 import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.PLAYER_URL;
-import static com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeConstants.SCREEN_PART_PAYLOAD;
 import static com.sedmelluq.discord.lavaplayer.tools.ExceptionTools.throwWithDebugInfo;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.SUSPICIOUS;
@@ -209,31 +198,37 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
         cachedPlayerScript.playerScriptUrl
     );
     HttpPost post = new HttpPost(PLAYER_URL);
-    StringEntity payload;
+    YoutubeClientConfig config;
 
     if (infoStatus == InfoStatus.PREMIERE_TRAILER) {
       // Android client gives encoded Base64 response to trailer which is also protobuf so we can't decode it
-      payload = new StringEntity(String.format(
-          String.format(
-              BASE_PAYLOAD, CLIENT_WEB_NAME, CLIENT_WEB_VERSION
-          ) + SCREEN_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + CLOSE_PLAYER_PAYLOAD, videoId, playerScriptTimestamp.scriptTimestamp
-      ), "UTF-8");
+      config = YoutubeClientConfig.WEB.copy();//.withClientDefaultScreenParameters()
     } else if (infoStatus == InfoStatus.NON_EMBEDDABLE) {
       // Used when age restriction bypass failed, if we have valid auth then most likely this request will be successful
-      payload = new StringEntity(String.format(PLAYER_PAYLOAD, videoId, playerScriptTimestamp.scriptTimestamp), "UTF-8");
+      config = YoutubeClientConfig.ANDROID_CLIENT.copy();//.withClientDefaultScreenParameters()
     } else if (infoStatus == InfoStatus.REQUIRES_LOGIN) {
       // Age restriction bypass
-      payload = new StringEntity(String.format(
-          String.format(
-              BASE_PAYLOAD, CLIENT_TVHTML5_NAME, CLIENT_TVHTML5_VERSION
-          ) + SCREEN_PART_PAYLOAD + EMBED_PART_PAYLOAD + CLOSE_BASE_PAYLOAD + CLOSE_PLAYER_PAYLOAD, videoId, playerScriptTimestamp.scriptTimestamp
-      ), "UTF-8");
+      config = YoutubeClientConfig.TV_EMBEDDED.copy()
+              .withClientScreen("EMBED")
+              .withThirdPartyEmbedUrl("https://google.com");
+              //.withClientDefaultScreenParameters();
     } else {
       // Default payload from what we start trying to get required data
-      payload = new StringEntity(String.format(PLAYER_EMBED_PAYLOAD, videoId, playerScriptTimestamp.scriptTimestamp), "UTF-8");
+      config = YoutubeClientConfig.ANDROID_CLIENT.copy()
+              .withClientScreen("EMBED")
+              .withThirdPartyEmbedUrl("https://google.com");
+              //.withClientDefaultScreenParameters();
     }
 
-    post.setEntity(payload);
+    String payload = config.withRootRacyCheckOk(true)
+            .withRootContentCheckOk(true)
+            .withRootVideoId(videoId)
+            .withPlaybackSignatureTimestamp(playerScriptTimestamp.scriptTimestamp)
+            .toJsonString();
+
+    log.info("Loading track info with payload: {}", payload);
+
+    post.setEntity(new StringEntity(payload, "UTF-8"));
     try (CloseableHttpResponse response = httpInterface.execute(post)) {
       HttpClientTools.assertSuccessWithContent(response, "video page response");
 
