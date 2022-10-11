@@ -12,6 +12,9 @@ public class YoutubeClientConfig {
 
     // Clients
     public static YoutubeClientConfig ANDROID_CLIENT = new YoutubeClientConfig()
+            // yes this is a weird way of doing it but the logic behind it is that this config can be overwritten by users
+            // if needed. This allows users to also override the user agent string which is used by the YoutubeHttpContextFilter.
+            .withUserAgent(String.format("com.google.android.youtube/%s (Linux; U; Android %s) gzip", ANDROID_CLIENT_VERSION, DEFAULT_ANDROID_VERSION.getOsVersion()))
             .withClientField("clientName", "ANDROID")
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
             .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
@@ -34,18 +37,31 @@ public class YoutubeClientConfig {
             .withClientField("clientName", "WEB_REMIX")
             .withClientField("clientVersion", "1.20220727.01.00");
 
+    private String userAgent;
+
     private final Map<String, Object> root;
 
     public YoutubeClientConfig() {
         this.root = new HashMap<>();
+        this.userAgent = null;
     }
 
-    private YoutubeClientConfig(Map<String, Object> context) {
+    private YoutubeClientConfig(Map<String, Object> context, String userAgent) {
         this.root = context;
+        this.userAgent = userAgent;
     }
 
     public YoutubeClientConfig copy() {
-        return new YoutubeClientConfig(new HashMap<>(root));
+        return new YoutubeClientConfig(new HashMap<>(root), userAgent);
+    }
+
+    public YoutubeClientConfig withUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+        return this;
+    }
+
+    public String getUserAgent() {
+        return this.userAgent;
     }
 
     public YoutubeClientConfig withClientDefaultScreenParameters() {
