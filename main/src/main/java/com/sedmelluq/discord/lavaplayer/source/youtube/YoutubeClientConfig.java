@@ -107,8 +107,8 @@ public class YoutubeClientConfig {
         ANDROID_12("12", 31), // 12L => 32
         ANDROID_11("11", 30);
 
-        private String osVersion;
-        private int sdkVersion;
+        private final String osVersion;
+        private final int sdkVersion;
 
         AndroidVersion(String osVersion, int sdkVersion) {
             this.osVersion = osVersion;
