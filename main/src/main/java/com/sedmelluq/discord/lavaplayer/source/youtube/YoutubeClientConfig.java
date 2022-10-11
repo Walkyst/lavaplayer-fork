@@ -8,14 +8,15 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class YoutubeClientConfig {
     public static final String ANDROID_CLIENT_VERSION = "17.39.35";
+    public static final AndroidVersion DEFAULT_ANDROID_VERSION = AndroidVersion.ANDROID_11;
 
     // Clients
     public static YoutubeClientConfig ANDROID_CLIENT = new YoutubeClientConfig()
             .withClientField("clientName", "ANDROID")
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
-            .withClientField("androidSdkVersion", 30)
+            .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
             .withClientField("osName", "Android")
-            .withClientField("osVersion", "11");
+            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion);
             //.withClientField("platform", "MOBILE")
             //.withClientField("hl", "en-GB")
             //.withClientField("gl", "US")
@@ -82,5 +83,28 @@ public class YoutubeClientConfig {
         Map<String, Object> client = (Map<String, Object>) context.computeIfAbsent("client", __ -> new HashMap<String, Object>());
         client.put(key, value);
         return this;
+    }
+
+    public enum AndroidVersion {
+        // https://apilevels.com/
+        ANDROID_13("13", 33),
+        ANDROID_12("12", 31), // 12L => 32
+        ANDROID_11("11", 30);
+
+        private String osVersion;
+        private int sdkVersion;
+
+        AndroidVersion(String osVersion, int sdkVersion) {
+            this.osVersion = osVersion;
+            this.sdkVersion = sdkVersion;
+        }
+
+        public String getOsVersion() {
+            return this.osVersion;
+        }
+
+        public int getSdkVersion() {
+            return this.sdkVersion;
+        }
     }
 }
