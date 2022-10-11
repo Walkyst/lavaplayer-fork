@@ -44,9 +44,8 @@ public class YoutubeMixProvider implements YoutubeMixLoader {
 
     HttpPost post = new HttpPost(NEXT_URL);
     String json = YoutubeClientConfig.ANDROID_CLIENT.copy()
-            .withRootVideoId(selectedVideoId)
-            .withRootPlaylistId(mixId)
-            //.withClientDefaultScreenParameters()
+            .withRootField("videoId", selectedVideoId)
+            .withRootField("playlistId", mixId)
             .toJsonString();
     StringEntity payload = new StringEntity(json, "UTF-8");
     post.setEntity(payload);

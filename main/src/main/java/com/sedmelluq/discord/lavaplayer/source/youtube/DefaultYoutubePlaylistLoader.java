@@ -37,7 +37,7 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
                             Function<AudioTrackInfo, AudioTrack> trackFactory) {
     HttpPost post = new HttpPost(BROWSE_URL);
     String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
-            .withRootBrowseId(playlistId)
+            .withRootField("browseId", "VL" + playlistId)
             .toJsonString();
     StringEntity payload = new StringEntity(clientJson, "UTF-8");
     post.setEntity(payload);
@@ -91,7 +91,7 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
     while (continuationsToken != null && ++loadCount < pageCount) {
       HttpPost post = new HttpPost(BROWSE_URL);
       String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
-              .withRootContinuation(continuationsToken)
+              .withRootField("continuation", continuationsToken)
               .toJsonString();
       StringEntity payload = new StringEntity(clientJson, "UTF-8");
       post.setEntity(payload);

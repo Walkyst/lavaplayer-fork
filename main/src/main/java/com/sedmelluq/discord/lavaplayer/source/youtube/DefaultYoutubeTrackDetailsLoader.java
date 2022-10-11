@@ -210,21 +210,21 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
     } else if (infoStatus == InfoStatus.REQUIRES_LOGIN) {
       // Age restriction bypass
       config = YoutubeClientConfig.TV_EMBEDDED.copy()
-              .withClientScreen("EMBED")
+              .withClientField("clientScreen", "EMBED")
               .withThirdPartyEmbedUrl("https://google.com");
               //.withClientDefaultScreenParameters();
     } else {
       // Default payload from what we start trying to get required data
       config = YoutubeClientConfig.ANDROID_CLIENT.copy()
-              .withClientScreen("EMBED")
+              .withClientField("clientScreen", "EMBED")
               .withThirdPartyEmbedUrl("https://google.com");
               //.withClientDefaultScreenParameters();
       httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
     }
 
-    String payload = config.withRootRacyCheckOk(true)
-            .withRootContentCheckOk(true)
-            .withRootVideoId(videoId)
+    String payload = config.withRootField("racyCheckOk", true)
+            .withRootField("contentCheckOk", true)
+            .withRootField("videoId", videoId)
             .withPlaybackSignatureTimestamp(playerScriptTimestamp.scriptTimestamp)
             .toJsonString();
 
