@@ -25,6 +25,8 @@ import static com.sedmelluq.discord.lavaplayer.tools.Units.CONTENT_LENGTH_UNKNOW
 public class YoutubeAudioTrack extends DelegatedAudioTrack {
   private static final Logger log = LoggerFactory.getLogger(YoutubeAudioTrack.class);
 
+  private static final int MAX_RETRIES = 3;
+
   private final YoutubeAudioSourceManager sourceManager;
 
   /**
@@ -39,6 +41,26 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
   @Override
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
+    for (int i = MAX_RETRIES; i > 0; i--) {
+      // Try load formats. This seems janky, but we retry in hopes of obtaining a URL with a different cipher --
+      // one that can be deciphered and played. This is more of a workaround than a legit fix.
+      try {
+        processInternal(localExecutor);
+      } catch (RuntimeException e) {
+        boolean isForbiddenError = e.getMessage().equals("Not success status code: 403");
+        if (i > 1 && localExecutor.getPosition() == 0 && isForbiddenError) {
+          // Only retry when not on last attempt, haven't received data, and it's a 403.
+          int attempt = (MAX_RETRIES - i) + 1;
+          log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", attempt, MAX_RETRIES);
+          continue;
+        }
+
+        throw e;
+      }
+    }
+  }
+
+  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
 
