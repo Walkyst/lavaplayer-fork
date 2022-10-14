@@ -46,21 +46,23 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       // one that can be deciphered and played. This is more of a workaround than a legit fix.
       try {
         processInternal(localExecutor);
-      } catch (RuntimeException e) {
-        boolean isForbiddenError = e.getMessage().equals("Not success status code: 403");
-        if (i > 1 && localExecutor.getPosition() == 0 && isForbiddenError) {
+      } catch (ForbiddenException e) {
+        if (i > 1 && localExecutor.getPosition() == 0) {
           // Only retry when not on last attempt, haven't received data, and it's a 403.
-          int attempt = (MAX_RETRIES - i) + 1;
-          log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", attempt, MAX_RETRIES);
+          log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
           continue;
         }
 
-        throw e;
+        FormatWithUrl format = e.format;
+        log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}",
+                trackInfo.identifier, format.details.getUrl().toString(), format.signedUrl, format.details.getSignatureKey(), format.details.getSignature(),
+                format.playerScriptUrl);
+        throw (Exception) e.getCause();
       }
     }
   }
 
-  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception {
+  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception, ForbiddenException {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
 
@@ -81,6 +83,12 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       } else {
         processDelegate(new MpegAudioTrack(trackInfo, stream), localExecutor);
       }
+    } catch (RuntimeException e) {
+      if (e.getMessage().equals("Not success status code: 403")) {
+        throw new ForbiddenException(format, e);
+      }
+
+      throw e;
     }
   }
 
@@ -110,7 +118,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
     URI signedUrl = sourceManager.getSignatureResolver()
         .resolveFormatUrl(httpInterface, details.getPlayerScript(), format);
 
-    return new FormatWithUrl(format, signedUrl);
+    return new FormatWithUrl(format, signedUrl, details.getPlayerScript());
   }
 
   @Override
@@ -161,10 +169,21 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
   private static class FormatWithUrl {
     private final YoutubeTrackFormat details;
     private final URI signedUrl;
+    private final String playerScriptUrl;
 
-    private FormatWithUrl(YoutubeTrackFormat details, URI signedUrl) {
+    private FormatWithUrl(YoutubeTrackFormat details, URI signedUrl, String playerScriptUrl) {
       this.details = details;
       this.signedUrl = signedUrl;
+      this.playerScriptUrl = playerScriptUrl;
+    }
+  }
+
+  private static class ForbiddenException extends Exception {
+    private final FormatWithUrl format;
+
+    public ForbiddenException(FormatWithUrl format, Throwable original) {
+      super(null, original, false, false);
+      this.format = format;
     }
   }
 }

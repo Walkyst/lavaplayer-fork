@@ -124,8 +124,6 @@ public class YoutubeSignatureCipherManager implements YoutubeSignatureResolver {
       }
     }
 
-    log.info("nFunction resolved");
-
     try {
       return uri.setParameter("ratebypass", "yes").build();
     } catch (URISyntaxException e) {
