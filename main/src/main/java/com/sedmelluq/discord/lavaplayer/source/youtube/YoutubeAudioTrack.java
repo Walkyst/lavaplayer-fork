@@ -44,66 +44,55 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
   @Override
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
-    for (int i = MAX_RETRIES; i > 0; i--) {
-      // Try load formats. This seems janky, but we retry in hopes of obtaining a URL with a different cipher --
-      // one that can be deciphered and played. This is more of a workaround than a legit fix.
+    //    httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+
+    try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
+      FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
+      log.debug("Starting track from URL: {}", format.signedUrl);
+
       try {
-        processInternal(localExecutor);
-      } catch (ForbiddenException e) {
-        // note for later: Experiment with setting android client user-agent header.
-        // with the recent changes to details loading, gv URLs may now expect the header to be present.
-        if (i > 1) {
+        processWithFormat(localExecutor, httpInterface, format);
+      } catch (Exception e) {
+        FormatWithUrl fallback = format.getFallback();
+
+        if (fallback == null) {
+          throw e;
+        }
+
+        processWithFormat(localExecutor, httpInterface, fallback);
+      }
+    }
+  }
+
+  private void processWithFormat(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
+    for (int i = MAX_RETRIES; i > 0; i--) {
+      try {
+        if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+          processStream(localExecutor, format);
+        } else {
+          processStatic(localExecutor, httpInterface, format);
+        }
+      } catch (RuntimeException e) {
+        if (i > 1 && e.getMessage().equals("Not success status code: 403")) {
           log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
           continue;
         }
 
-        FormatWithUrl format = e.format;
         log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}\n\tFormat String:{}",
                 trackInfo.identifier, format.details.getUrl().toString(), format.signedUrl, format.details.getSignatureKey(), format.details.getSignature(),
                 format.playerScriptUrl, format.details.getExtra());
-        throw (Exception) e.getCause();
+        throw e;
       }
     }
   }
 
-  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception {
-    try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
-      FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
-
-      log.debug("Starting track from URL: {}", format.signedUrl);
-
-      if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-        processStream(localExecutor, format);
-      } else {
-        processStatic(localExecutor, httpInterface, format, false);
-      }
-    }
-  }
-
-  private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format, boolean isFallback) throws Exception {
-    httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+  private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
     try (YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
       if (format.details.getType().getMimeType().endsWith("/webm")) {
         processDelegate(new MatroskaAudioTrack(trackInfo, stream), localExecutor);
       } else {
         processDelegate(new MpegAudioTrack(trackInfo, stream), localExecutor);
       }
-    } catch (RuntimeException e) {
-      if (!isFallback) {
-        FormatWithUrl fallback = format.getFallback();
-
-        if (fallback != null) {
-          log.warn("Falling back with {}", fallback.signedUrl);
-          processStatic(localExecutor, httpInterface, fallback, true);
-          return;
-        }
-      }
-
-      if (e.getMessage().equals("Not success status code: 403")) {
-        throw new ForbiddenException(format, e);
-      }
-
-      throw e;
     }
   }
 
@@ -217,15 +206,6 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       } catch (URISyntaxException e) {
         return null;
       }
-    }
-  }
-
-  private static class ForbiddenException extends Exception {
-    private final FormatWithUrl format;
-
-    public ForbiddenException(FormatWithUrl format, Throwable original) {
-      super(null, original, false, false);
-      this.format = format;
     }
   }
 }
