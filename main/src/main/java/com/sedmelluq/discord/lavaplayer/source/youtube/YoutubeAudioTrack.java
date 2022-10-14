@@ -47,6 +47,8 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       try {
         processInternal(localExecutor);
       } catch (ForbiddenException e) {
+        // note for later: Experiment with setting android client user-agent header.
+        // with the recent changes to details loading, gv URLs may now expect the header to be present.
         if (i > 1 && localExecutor.getPosition() == 0) {
           // Only retry when not on last attempt, haven't received data, and it's a 403.
           log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
