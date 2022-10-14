@@ -10,12 +10,15 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.DelegatedAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.sedmelluq.discord.lavaplayer.container.Formats.MIME_AUDIO_WEBM;
+import static com.sedmelluq.discord.lavaplayer.tools.DataFormatTools.decodeUrlEncodedItems;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
 import static com.sedmelluq.discord.lavaplayer.tools.Units.CONTENT_LENGTH_UNKNOWN;
 
@@ -86,10 +89,17 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
         processDelegate(new MpegAudioTrack(trackInfo, stream), localExecutor);
       }
     } catch (RuntimeException e) {
+      if (!isFallback) {
+        FormatWithUrl fallback = format.getFallback();
+
+        if (fallback != null) {
+          log.warn("Falling back with {}", fallback.signedUrl);
+          processStatic(localExecutor, httpInterface, fallback, true);
+          return;
+        }
+      }
+
       if (e.getMessage().equals("Not success status code: 403")) {
-//        if (!isFallback) {
-//          processStatic(localExecutor, httpInterface, format.getFallback(), true);
-//        }
         throw new ForbiddenException(format, e);
       }
 
@@ -180,6 +190,33 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       this.details = details;
       this.signedUrl = signedUrl;
       this.playerScriptUrl = playerScriptUrl;
+    }
+
+    public FormatWithUrl getFallback() {
+      String signedUrl = this.signedUrl.toString();
+      Map<String, String> urlParameters = decodeUrlEncodedItems(signedUrl, false);
+
+      String mn = urlParameters.get("mn");
+
+      if (mn == null) {
+        return null;
+      }
+
+      String[] hosts = mn.split(",");
+
+      if (hosts.length < 2) {
+        log.warn("Cannot fallback, available hosts: {}", String.join(", ", hosts));
+        return null;
+      }
+
+      String newUrl = signedUrl.replace(hosts[0], hosts[1]);
+
+      try {
+        URI uri = new URI(newUrl);
+        return new FormatWithUrl(details, uri, playerScriptUrl);
+      } catch (URISyntaxException e) {
+        return null;
+      }
     }
   }
 
