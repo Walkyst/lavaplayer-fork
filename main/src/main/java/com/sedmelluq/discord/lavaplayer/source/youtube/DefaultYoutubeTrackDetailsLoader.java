@@ -215,11 +215,11 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
               //.withClientDefaultScreenParameters();
     } else {
       // Default payload from what we start trying to get required data
-      config = YoutubeClientConfig.ANDROID_CLIENT.copy()
-              .withClientField("clientScreen", "EMBED")
-              .withThirdPartyEmbedUrl("https://google.com");
+      config = YoutubeClientConfig.WEB.copy();
+              //.withClientField("clientScreen", "EMBED")
+              //.withThirdPartyEmbedUrl("https://google.com");
               //.withClientDefaultScreenParameters();
-      httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+      //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
     }
 
     String payload = config.withRootField("racyCheckOk", true)
