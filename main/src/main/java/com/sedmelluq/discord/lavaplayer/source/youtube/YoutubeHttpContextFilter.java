@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import static com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity.COMMON;
 
 public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
-  private static final Logger log = LoggerFactory.getLogger(BaseYoutubeHttpContextFilter.class);
+  private static final Logger log = LoggerFactory.getLogger(YoutubeHttpContextFilter.class);
 
 
   private static final String ATTRIBUTE_RESET_RETRY = "isResetRetry";
@@ -67,7 +67,7 @@ public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
     }
 
     if (context.getAttribute(ATTRIBUTE_ANDROID_REQUEST) == Boolean.TRUE) {
-      log.info("Applying android user-agent header.");
+      log.debug("Applying android user-agent header.");
       request.setHeader("user-agent", YoutubeClientConfig.ANDROID_CLIENT.getUserAgent());
       context.removeAttribute(ATTRIBUTE_ANDROID_REQUEST);
     }
