@@ -87,7 +87,7 @@ public class YoutubeAccessTokenTracker {
     synchronized (tokenLock) {
       if (DataFormatTools.isNullOrEmpty(email) && DataFormatTools.isNullOrEmpty(password)) {
         if (!loggedAgeRestrictionsWarning) {
-          log.warn("YouTube auth tokens can't be retrieved because email and password is not set in YoutubeAudioSourceManager, age restricted videos will throw exceptions.");
+          log.warn("YouTube auth tokens can't be retrieved because email and password is unset in YoutubeAudioSourceManager, age restricted videos may throw exceptions.");
           loggedAgeRestrictionsWarning = true;
         }
         return;
@@ -124,7 +124,7 @@ public class YoutubeAccessTokenTracker {
     synchronized (tokenLock) {
       if (DataFormatTools.isNullOrEmpty(email) && DataFormatTools.isNullOrEmpty(password)) {
         if (!loggedAgeRestrictionsWarning) {
-          log.warn("YouTube auth tokens can't be retrieved because email and password is not set in YoutubeAudioSourceManager, age restricted videos will throw exceptions.");
+          log.warn("YouTube auth tokens can't be retrieved because email and password is unset in YoutubeAudioSourceManager, age restricted videos may throw exceptions.");
           loggedAgeRestrictionsWarning = true;
         }
         return;
@@ -266,7 +266,7 @@ public class YoutubeAccessTokenTracker {
   }
 
   private void createAndroidAccount(HttpInterface httpInterface, JsonBrowser jsonBrowser) throws IOException {
-    log.info("Account " + jsonBrowser.get("email").text() + " don't have Android or YouTube profile, creating new one...");
+    log.info("Account {} doesn't have an Android or YouTube profile, creating new one...", jsonBrowser.get("email").text());
 
     HttpPost post = new HttpPost(CHECKIN_ACCOUNT_URL);
     StringEntity payload = new StringEntity(String.format(TOKEN_PAYLOAD, email, password));
@@ -278,7 +278,7 @@ public class YoutubeAccessTokenTracker {
   }
 
   private String continueUrl(HttpInterface httpInterface, JsonBrowser jsonBrowser) throws IOException {
-    log.warn("Not successful attempt to login into account " + jsonBrowser.get("email").text() + ", trying obtain oauth2 token through continue url...");
+    log.warn("Attempt to login into account {} was unsuccessful, trying obtain oauth2 token through continue url...", jsonBrowser.get("email").text());
 
     HttpPost post = new HttpPost(jsonBrowser.get("continueUrl").text());
     RequestConfig config = RequestConfig.custom().setCookieSpec(CookieSpecs.NETSCAPE).setRedirectsEnabled(true).build();

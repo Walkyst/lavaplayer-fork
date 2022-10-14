@@ -88,8 +88,8 @@ public class StreamingDataFormatsExtractor implements OfflineYoutubeTrackFormatE
     }
 
     if (tracks.isEmpty() && anyFailures) {
-      log.warn("In streamingData adaptive formats {}, all formats either failed to load or were skipped due to missing " +
-          "fields", formats.format());
+      log.warn("In streamingData adaptive formats {}, all formats either failed to load or were skipped due to missing fields",
+              formats.format());
     }
 
     return tracks;
