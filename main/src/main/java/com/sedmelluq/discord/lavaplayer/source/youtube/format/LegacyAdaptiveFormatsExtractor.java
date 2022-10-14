@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.http.entity.ContentType;
 
 import static com.sedmelluq.discord.lavaplayer.tools.DataFormatTools.decodeUrlEncodedItems;
@@ -36,7 +38,8 @@ public class LegacyAdaptiveFormatsExtractor implements OfflineYoutubeTrackFormat
           format.get("url"),
           "",
           format.get("s"),
-          format.getOrDefault("sp", DEFAULT_SIGNATURE_KEY)
+          format.getOrDefault("sp", DEFAULT_SIGNATURE_KEY),
+          format.entrySet().stream().map(item -> item.getKey() + "=" + item.getValue()).collect(Collectors.joining(","))
       ));
     }
 

@@ -4,6 +4,8 @@ import org.apache.http.entity.ContentType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Describes an available media format for a track
@@ -18,6 +20,7 @@ public class YoutubeTrackFormat {
   private final String nParameter;
   private final String signature;
   private final String signatureKey;
+  private final String extra;
 
   /**
    * @param type Mime type of the format
@@ -37,7 +40,8 @@ public class YoutubeTrackFormat {
       String url,
       String nParameter,
       String signature,
-      String signatureKey
+      String signatureKey,
+      String extra
   ) {
     this.info = YoutubeFormatInfo.get(type);
     this.type = type;
@@ -48,6 +52,7 @@ public class YoutubeTrackFormat {
     this.nParameter = nParameter;
     this.signature = signature;
     this.signatureKey = signatureKey;
+    this.extra = extra;
   }
 
   /**
@@ -115,5 +120,9 @@ public class YoutubeTrackFormat {
    */
   public String getSignatureKey() {
     return signatureKey;
+  }
+
+  public String getExtra() {
+    return this.extra;
   }
 }

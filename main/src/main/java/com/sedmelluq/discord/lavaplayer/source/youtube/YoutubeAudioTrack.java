@@ -56,9 +56,9 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
         }
 
         FormatWithUrl format = e.format;
-        log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}",
+        log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}\n\tFormat String:{}",
                 trackInfo.identifier, format.details.getUrl().toString(), format.signedUrl, format.details.getSignatureKey(), format.details.getSignature(),
-                format.playerScriptUrl);
+                format.playerScriptUrl, format.details.getExtra());
         throw (Exception) e.getCause();
       }
     }
@@ -73,12 +73,12 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
         processStream(localExecutor, format);
       } else {
-        processStatic(localExecutor, httpInterface, format);
+        processStatic(localExecutor, httpInterface, format, false);
       }
     }
   }
 
-  private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
+  private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format, boolean isFallback) throws Exception {
     try (YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
       if (format.details.getType().getMimeType().endsWith("/webm")) {
         processDelegate(new MatroskaAudioTrack(trackInfo, stream), localExecutor);
@@ -87,6 +87,9 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       }
     } catch (RuntimeException e) {
       if (e.getMessage().equals("Not success status code: 403")) {
+//        if (!isFallback) {
+//          processStatic(localExecutor, httpInterface, format.getFallback(), true);
+//        }
         throw new ForbiddenException(format, e);
       }
 
