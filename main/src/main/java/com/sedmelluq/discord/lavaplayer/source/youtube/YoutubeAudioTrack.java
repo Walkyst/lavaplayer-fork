@@ -52,8 +52,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       } catch (ForbiddenException e) {
         // note for later: Experiment with setting android client user-agent header.
         // with the recent changes to details loading, gv URLs may now expect the header to be present.
-        if (i > 1 && localExecutor.getPosition() == 0) {
-          // Only retry when not on last attempt, haven't received data, and it's a 403.
+        if (i > 1) {
           log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
           continue;
         }
@@ -82,6 +81,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
   }
 
   private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format, boolean isFallback) throws Exception {
+    httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
     try (YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
       if (format.details.getType().getMimeType().endsWith("/webm")) {
         processDelegate(new MatroskaAudioTrack(trackInfo, stream), localExecutor);
