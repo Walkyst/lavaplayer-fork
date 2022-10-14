@@ -62,7 +62,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
     }
   }
 
-  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception, ForbiddenException {
+  private void processInternal(LocalAudioTrackExecutor localExecutor) throws Exception {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
 
