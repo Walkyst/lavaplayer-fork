@@ -44,7 +44,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
   @Override
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
-    //    httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+    //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
 
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
@@ -198,7 +198,7 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
         return null;
       }
 
-      String newUrl = signedUrl.replace(hosts[0], hosts[1]);
+      String newUrl = signedUrl.replaceFirst(hosts[0], hosts[1]);
 
       try {
         URI uri = new URI(newUrl);
