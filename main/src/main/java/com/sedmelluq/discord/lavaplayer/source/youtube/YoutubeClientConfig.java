@@ -19,11 +19,11 @@ public class YoutubeClientConfig {
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
             .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
             .withClientField("osName", "Android")
-            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion)
-            .withClientField("platform", "MOBILE")
-            .withClientField("hl", "en-US")
-            .withClientField("gl", "US")
-            .withUserField("lockedSafetyMode", false);
+            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion);
+//            .withClientField("platform", "MOBILE")
+//            .withClientField("hl", "en-US")
+//            .withClientField("gl", "US")
+//            .withUserField("lockedSafetyMode", false);
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
             .withClientField("clientName", "TVHTML5_SIMPLY_EMBEDDED_PLAYER")
