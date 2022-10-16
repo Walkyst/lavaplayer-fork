@@ -11,9 +11,10 @@ public class YoutubeClientConfig {
     public static final AndroidVersion DEFAULT_ANDROID_VERSION = AndroidVersion.ANDROID_11;
 
     // Clients
-    public static YoutubeClientConfig ANDROID_CLIENT = new YoutubeClientConfig()
+    public static YoutubeClientConfig ANDROID = new YoutubeClientConfig()
             // yes this is a weird way of doing it but the logic behind it is that this config can be overwritten by users
             // if needed. This allows users to also override the user agent string which is used by the YoutubeHttpContextFilter.
+            // Android %s; US)
             .withUserAgent(String.format("com.google.android.youtube/%s (Linux; U; Android %s) gzip", ANDROID_CLIENT_VERSION, DEFAULT_ANDROID_VERSION.getOsVersion()))
             .withClientField("clientName", "ANDROID")
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
@@ -24,6 +25,19 @@ public class YoutubeClientConfig {
 //            .withClientField("hl", "en-US")
 //            .withClientField("gl", "US")
 //            .withUserField("lockedSafetyMode", false);
+
+    public static YoutubeClientConfig IOS = new YoutubeClientConfig()
+            .withUserAgent("com.google.ios.youtube/17.31.4 (iPhone14,5; U; CPU iOS 15_6 like Mac OS X)")
+            .withClientField("clientName", "IOS")
+            .withClientField("clientVersion", "17.31.4")
+            .withClientField("deviceMake", "Apple")
+            .withClientField("deviceModel", "iPhone14,5")
+            .withClientField("platform", "MOBILE")
+            .withClientField("osName", "iOS")
+            .withClientField("osVersion", "15.6.0.19G71");
+//            .withClientField("hl", "en-US")
+//            .withClientField("gl", "US")
+//            .withUserField("lockedSafetyMode", false)
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
             .withClientField("clientName", "TVHTML5_SIMPLY_EMBEDDED_PLAYER")

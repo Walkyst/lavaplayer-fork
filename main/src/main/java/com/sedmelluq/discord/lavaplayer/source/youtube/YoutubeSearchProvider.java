@@ -50,7 +50,7 @@ public class YoutubeSearchProvider implements YoutubeSearchResultLoader {
 
     try (HttpInterface httpInterface = httpInterfaceManager.getInterface()) {
       HttpPost post = new HttpPost(SEARCH_URL);
-      String json = YoutubeClientConfig.ANDROID_CLIENT.copy()
+      String json = YoutubeClientConfig.ANDROID.copy()
               .withRootField("query", query)
               .withRootField("params", "EgIQAQ==")
               //.withClientDefaultScreenParameters()

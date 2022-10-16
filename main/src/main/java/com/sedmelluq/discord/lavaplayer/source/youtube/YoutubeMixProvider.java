@@ -43,7 +43,7 @@ public class YoutubeMixProvider implements YoutubeMixLoader {
     List<AudioTrack> tracks = new ArrayList<>();
 
     HttpPost post = new HttpPost(NEXT_URL);
-    String json = YoutubeClientConfig.ANDROID_CLIENT.copy()
+    String json = YoutubeClientConfig.ANDROID.copy()
             .withRootField("videoId", selectedVideoId)
             .withRootField("playlistId", mixId)
             .toJsonString();

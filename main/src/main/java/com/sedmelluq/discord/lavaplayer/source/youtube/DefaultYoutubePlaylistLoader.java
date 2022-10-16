@@ -36,7 +36,7 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
   public AudioPlaylist load(HttpInterface httpInterface, String playlistId, String selectedVideoId,
                             Function<AudioTrackInfo, AudioTrack> trackFactory) {
     HttpPost post = new HttpPost(BROWSE_URL);
-    String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
+    String clientJson = YoutubeClientConfig.ANDROID.copy()
             .withRootField("browseId", "VL" + playlistId)
             .toJsonString();
     StringEntity payload = new StringEntity(clientJson, "UTF-8");
@@ -90,7 +90,7 @@ public class DefaultYoutubePlaylistLoader implements YoutubePlaylistLoader {
     // Also load the next pages, each result gives us a JSON with separate values for list html and next page loader html
     while (continuationsToken != null && ++loadCount < pageCount) {
       HttpPost post = new HttpPost(BROWSE_URL);
-      String clientJson = YoutubeClientConfig.ANDROID_CLIENT.copy()
+      String clientJson = YoutubeClientConfig.ANDROID.copy()
               .withRootField("continuation", continuationsToken)
               .toJsonString();
       StringEntity payload = new StringEntity(clientJson, "UTF-8");
