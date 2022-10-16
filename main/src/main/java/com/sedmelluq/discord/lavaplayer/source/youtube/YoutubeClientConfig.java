@@ -16,7 +16,7 @@ public class YoutubeClientConfig {
             // if needed. This allows users to also override the user agent string which is used by the YoutubeHttpContextFilter.
             // Android %s; US)
             .withUserAgent(String.format("com.google.android.youtube/%s (Linux; U; Android %s) gzip", ANDROID_CLIENT_VERSION, DEFAULT_ANDROID_VERSION.getOsVersion()))
-            .withClientField("clientName", "ANDROID")
+            .withClientName("ANDROID")
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
             .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
             .withClientField("osName", "Android")
@@ -28,7 +28,7 @@ public class YoutubeClientConfig {
 
     public static YoutubeClientConfig IOS = new YoutubeClientConfig()
             .withUserAgent("com.google.ios.youtube/17.31.4 (iPhone14,5; U; CPU iOS 15_6 like Mac OS X)")
-            .withClientField("clientName", "IOS")
+            .withClientName("IOS")
             .withClientField("clientVersion", "17.31.4")
             .withClientField("deviceMake", "Apple")
             .withClientField("deviceModel", "iPhone14,5")
@@ -40,21 +40,23 @@ public class YoutubeClientConfig {
 //            .withUserField("lockedSafetyMode", false)
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
-            .withClientField("clientName", "TVHTML5_SIMPLY_EMBEDDED_PLAYER")
+            .withClientName("TVHTML5_SIMPLY_EMBEDDED_PLAYER")
             .withClientField("clientVersion", "2.0");
             // platform TV
 
     public static YoutubeClientConfig WEB = new YoutubeClientConfig()
-            .withClientField("clientName", "WEB")
+            .withClientName("WEB")
             .withClientField("clientVersion", "2.20220801.00.00");
             // platform DESKTOP
 
     public static YoutubeClientConfig MUSIC = new YoutubeClientConfig()
-            .withClientField("clientName", "WEB_REMIX")
+            .withClientName("WEB_REMIX")
             .withClientField("clientVersion", "1.20220727.01.00");
 
     // root.cpn => content playback nonce, a-zA-Z0-9-_ (16 characters)
     // contextPlaybackContext.refer => url (video watch URL?)
+
+    private String name;
 
     private String userAgent;
 
@@ -63,15 +65,27 @@ public class YoutubeClientConfig {
     public YoutubeClientConfig() {
         this.root = new HashMap<>();
         this.userAgent = null;
+        this.name = null;
     }
 
-    private YoutubeClientConfig(Map<String, Object> context, String userAgent) {
+    private YoutubeClientConfig(Map<String, Object> context, String userAgent, String name) {
         this.root = context;
         this.userAgent = userAgent;
+        this.name = name;
     }
 
     public YoutubeClientConfig copy() {
-        return new YoutubeClientConfig(new HashMap<>(root), userAgent);
+        return new YoutubeClientConfig(new HashMap<>(this.root), this.userAgent, this.name);
+    }
+
+    public YoutubeClientConfig withClientName(String name) {
+        this.name = name;
+        withClientField("clientName", name);
+        return this;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public YoutubeClientConfig withUserAgent(String userAgent) {

@@ -66,7 +66,9 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
   private void processStaticWithClientRetry(LocalAudioTrackExecutor localExecutor) throws Exception {
     for (int i = 0; i < CLIENT_CONFIG_SEQUENCE.length; i++) {
+      log.warn("Encountered 403 whilst trying to play {}, retrying with client {}", this.trackInfo.identifier, CLIENT_CONFIG_SEQUENCE[i].getName());
       FormatWithUrl format = loadBestFormatWithUrl(CLIENT_CONFIG_SEQUENCE[i]);
+
       try {
         processStatic(localExecutor, format);
         return;
