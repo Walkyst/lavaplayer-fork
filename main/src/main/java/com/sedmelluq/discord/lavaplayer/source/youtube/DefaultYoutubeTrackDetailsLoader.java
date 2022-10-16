@@ -29,8 +29,13 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
 
   @Override
   public YoutubeTrackDetails loadDetails(HttpInterface httpInterface, String videoId, boolean requireFormats, YoutubeAudioSourceManager sourceManager) {
+    return this.loadDetails(httpInterface, videoId, requireFormats, sourceManager, null);
+  }
+
+  @Override
+  public YoutubeTrackDetails loadDetails(HttpInterface httpInterface, String videoId, boolean requireFormats, YoutubeAudioSourceManager sourceManager, YoutubeClientConfig clientOverride) {
     try {
-      return load(httpInterface, videoId, requireFormats, sourceManager);
+      return load(httpInterface, videoId, requireFormats, sourceManager, clientOverride);
     } catch (IOException e) {
       throw ExceptionTools.toRuntimeException(e);
     }
@@ -40,9 +45,10 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
       HttpInterface httpInterface,
       String videoId,
       boolean requireFormats,
-      YoutubeAudioSourceManager sourceManager
+      YoutubeAudioSourceManager sourceManager,
+      YoutubeClientConfig clientOverride
   ) throws IOException {
-    JsonBrowser mainInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, null);
+    JsonBrowser mainInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, null, clientOverride);
 
     try {
       YoutubeTrackJsonData initialData = loadBaseResponse(mainInfo, httpInterface, videoId, sourceManager);
@@ -74,7 +80,7 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
     }
 
     if (status == InfoStatus.PREMIERE_TRAILER) {
-      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status);
+      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status, null);
       data = YoutubeTrackJsonData.fromMainResult(trackInfo
           .get("playabilityStatus")
           .get("errorScreen")
@@ -85,13 +91,13 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
     }
 
     if (status == InfoStatus.REQUIRES_LOGIN) {
-      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status);
+      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status, null);
       data = YoutubeTrackJsonData.fromMainResult(trackInfo);
       status = checkPlayabilityStatus(data.playerResponse, true);
     }
 
     if (status == InfoStatus.NON_EMBEDDABLE) {
-      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status);
+      JsonBrowser trackInfo = loadTrackInfoFromInnertube(httpInterface, videoId, sourceManager, status, null);
       data = YoutubeTrackJsonData.fromMainResult(trackInfo);
       checkPlayabilityStatus(data.playerResponse, true);
     }
@@ -189,7 +195,8 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
       HttpInterface httpInterface,
       String videoId,
       YoutubeAudioSourceManager sourceManager,
-      InfoStatus infoStatus
+      InfoStatus infoStatus,
+      YoutubeClientConfig clientOverride
   ) throws IOException {
     if (cachedPlayerScript == null) fetchScript(videoId, httpInterface);
 
@@ -198,28 +205,35 @@ public class DefaultYoutubeTrackDetailsLoader implements YoutubeTrackDetailsLoad
         cachedPlayerScript.playerScriptUrl
     );
     HttpPost post = new HttpPost(PLAYER_URL);
-    YoutubeClientConfig config;
+    YoutubeClientConfig config = clientOverride;
 
-    if (infoStatus == InfoStatus.PREMIERE_TRAILER) {
-      // Android client gives encoded Base64 response to trailer which is also protobuf so we can't decode it
-      config = YoutubeClientConfig.WEB.copy();//.withClientDefaultScreenParameters()
-    } else if (infoStatus == InfoStatus.NON_EMBEDDABLE) {
-      // Used when age restriction bypass failed, if we have valid auth then most likely this request will be successful
-      config = YoutubeClientConfig.ANDROID.copy();//.withClientDefaultScreenParameters()
-      httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
-    } else if (infoStatus == InfoStatus.REQUIRES_LOGIN) {
-      // Age restriction bypass
-      config = YoutubeClientConfig.TV_EMBEDDED.copy()
-              .withClientField("clientScreen", "EMBED")
-              .withThirdPartyEmbedUrl("https://google.com");
-              //.withClientDefaultScreenParameters();
-    } else {
-      // Default payload from what we start trying to get required data
-      config = YoutubeClientConfig.WEB.copy();
-              //.withClientField("clientScreen", "EMBED")
-              //.withThirdPartyEmbedUrl("https://google.com");
-              //.withClientDefaultScreenParameters();
-      //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+    if (clientOverride == null) {
+      if (infoStatus == InfoStatus.PREMIERE_TRAILER) {
+        // Android client gives encoded Base64 response to trailer which is also protobuf so we can't decode it
+        config = YoutubeClientConfig.WEB.copy();//.withClientDefaultScreenParameters()
+      } else if (infoStatus == InfoStatus.NON_EMBEDDABLE) {
+        // Used when age restriction bypass failed, if we have valid auth then most likely this request will be successful
+        config = YoutubeClientConfig.ANDROID.copy();//.withClientDefaultScreenParameters()
+      } else if (infoStatus == InfoStatus.REQUIRES_LOGIN) {
+        // Age restriction bypass
+        config = YoutubeClientConfig.TV_EMBEDDED.copy()
+                .withClientField("clientScreen", "EMBED")
+                .withThirdPartyEmbedUrl("https://google.com")
+                .withClientDefaultScreenParameters();
+      } else {
+        // Default payload from what we start trying to get required data
+        config = YoutubeClientConfig.WEB.copy();
+          //.withClientField("clientScreen", "EMBED")
+          //.withThirdPartyEmbedUrl("https://google.com");
+          //.withClientDefaultScreenParameters();
+
+        //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_USER_AGENT_SPECIFIED, YoutubeClientConfig.ANDROID.getUserAgent());
+      }
+    }
+
+    String userAgent = config.getUserAgent();
+    if (userAgent != null) {
+      httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_USER_AGENT_SPECIFIED, config.getUserAgent());
     }
 
     String payload = config.withRootField("racyCheckOk", true)

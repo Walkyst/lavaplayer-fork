@@ -47,14 +47,29 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
   @Override
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
     //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
+    try {
+      FormatWithUrl format = loadBestFormatWithUrl(YoutubeClientConfig.ANDROID);
+      log.debug("Starting track from URL: {}", format.signedUrl);
 
-    FormatWithUrl format = loadBestFormatWithUrl();
-    log.debug("Starting track from URL: {}", format.signedUrl);
+      if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+        processStream(localExecutor, format); // perhaps this should be using the interface too?
+      } else {
+        processStatic(localExecutor, format);
+      }
+    } catch (RuntimeException e) {
+      if (e.getMessage().equals("Not success status code: 403")) {
+        // yeah this is ugly but it's for testing
+        log.warn("Received 403 whilst trying to play track, retrying with iOS client.");
 
-    if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-      processStream(localExecutor, format); // perhaps this should be using the interface too?
-    } else {
-      processStatic(localExecutor, format);
+        FormatWithUrl format = loadBestFormatWithUrl(YoutubeClientConfig.IOS);
+        log.debug("Starting track from URL: {}", format.signedUrl);
+
+        if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+          processStream(localExecutor, format); // perhaps this should be using the interface too?
+        } else {
+          processStatic(localExecutor, format);
+        }
+      }
     }
 //      try {
 //        processWithFormat(localExecutor, httpInterface, format);
@@ -108,10 +123,10 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
     }
   }
 
-  private FormatWithUrl loadBestFormatWithUrl() throws Exception {
+  private FormatWithUrl loadBestFormatWithUrl(YoutubeClientConfig clientConfig) throws Exception {
     try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
       YoutubeTrackDetails details = sourceManager.getTrackDetailsLoader()
-              .loadDetails(httpInterface, getIdentifier(), true, sourceManager);
+              .loadDetails(httpInterface, getIdentifier(), true, sourceManager, clientConfig);
 
       // If the error reason is "Video unavailable" details will return null
       if (details == null) {

@@ -25,7 +25,7 @@ public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
 
 
   private static final String ATTRIBUTE_RESET_RETRY = "isResetRetry";
-  public static final String ATTRIBUTE_ANDROID_REQUEST = "android-client-req";
+  public static final String ATTRIBUTE_USER_AGENT_SPECIFIED = "clientUserAgent";
 
   private static final HttpContextRetryCounter retryCounter = new HttpContextRetryCounter("yt-token-retry");
 
@@ -66,10 +66,11 @@ public class YoutubeHttpContextFilter extends BaseYoutubeHttpContextFilter {
       return;
     }
 
-    if (context.getAttribute(ATTRIBUTE_ANDROID_REQUEST) == Boolean.TRUE) {
-      log.debug("Applying android user-agent header.");
-      request.setHeader("user-agent", YoutubeClientConfig.ANDROID.getUserAgent());
-      context.removeAttribute(ATTRIBUTE_ANDROID_REQUEST);
+    String clientUserAgent = context.getAttribute(ATTRIBUTE_USER_AGENT_SPECIFIED, String.class);
+    if (clientUserAgent != null) {
+      log.debug("Applying user-agent header \"{}\"", clientUserAgent);
+      request.setHeader("user-agent", clientUserAgent);
+      context.removeAttribute(ATTRIBUTE_USER_AGENT_SPECIFIED);
     }
 
     String accessToken = tokenTracker.getAccessToken();
