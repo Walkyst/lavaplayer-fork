@@ -14,6 +14,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,41 +52,42 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
       FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
       log.debug("Starting track from URL: {}", format.signedUrl);
 
-      try {
-        processWithFormat(localExecutor, httpInterface, format);
-      } catch (Exception e) {
-        FormatWithUrl fallback = format.getFallback();
-
-        if (fallback == null) {
-          throw e;
-        }
-
-        processWithFormat(localExecutor, httpInterface, fallback);
+      if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+        processStream(localExecutor, format); // perhaps this should be using the interface too?
+      } else {
+        processStatic(localExecutor, httpInterface, format);
       }
+//      try {
+//        processWithFormat(localExecutor, httpInterface, format);
+//      } catch (Exception e) {
+//        FormatWithUrl fallback = format.getFallback();
+//
+//        if (fallback == null) {
+//          throw e;
+//        }
+//
+//        processWithFormat(localExecutor, httpInterface, fallback);
+//      }
     }
   }
 
-  private void processWithFormat(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
-    for (int i = MAX_RETRIES; i > 0; i--) {
-      try {
-        if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-          processStream(localExecutor, format);
-        } else {
-          processStatic(localExecutor, httpInterface, format);
-        }
-      } catch (RuntimeException e) {
-        if (i > 1 && e.getMessage().equals("Not success status code: 403")) {
-          log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
-          continue;
-        }
-
-        log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}\n\tFormat String:{}",
-                trackInfo.identifier, format.details.getUrl().toString(), format.signedUrl, format.details.getSignatureKey(), format.details.getSignature(),
-                format.playerScriptUrl, format.details.getExtra());
-        throw e;
-      }
-    }
-  }
+//  private void processWithFormat(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
+//    for (int i = MAX_RETRIES; i > 0; i--) {
+//      try {
+//
+//      } catch (RuntimeException e) {
+//        if (i > 1 && e.getMessage().equals("Not success status code: 403")) {
+//          log.warn("Received 403 response when attempting to load track. Retrying (attempt {}/{})", (MAX_RETRIES - i) + 1, MAX_RETRIES);
+//          continue;
+//        }
+//
+//        log.warn("Failed to play {}\n\tCiphered URL: {}\n\tDeciphered URL: {}\n\tSignature Key: {}\n\tSignature: {}\n\tPlayer Script URL: {}\n\tFormat String:{}",
+//                trackInfo.identifier, format.details.getUrl().toString(), format.signedUrl, format.details.getSignatureKey(), format.details.getSignature(),
+//                format.playerScriptUrl, format.details.getExtra());
+//        throw e;
+//      }
+//    }
+//  }
 
   private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
     try (YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
@@ -99,10 +102,10 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
   private void processStream(LocalAudioTrackExecutor localExecutor, FormatWithUrl format) throws Exception {
     if (MIME_AUDIO_WEBM.equals(format.details.getType().getMimeType())) {
       throw new FriendlyException("YouTube WebM streams are currently not supported.", COMMON, null);
-    } else {
-      try (HttpInterface streamingInterface = sourceManager.getHttpInterface()) {
-        processDelegate(new YoutubeMpegStreamAudioTrack(trackInfo, streamingInterface, format.signedUrl), localExecutor);
-      }
+    }
+
+    try (HttpInterface streamingInterface = sourceManager.getHttpInterface()) {
+      processDelegate(new YoutubeMpegStreamAudioTrack(trackInfo, streamingInterface, format.signedUrl), localExecutor);
     }
   }
 
