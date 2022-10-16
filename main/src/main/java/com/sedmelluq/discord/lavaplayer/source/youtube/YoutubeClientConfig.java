@@ -29,7 +29,7 @@ public class YoutubeClientConfig {
     public static YoutubeClientConfig IOS = new YoutubeClientConfig()
             .withUserAgent("com.google.ios.youtube/17.36.4 (iPhone14,5; U; CPU iOS 15_6 like Mac OS X)")
             .withClientName("IOS")
-            .withClientField("clientVersion", "17.36.4")
+            .withClientField("clientVersion", "17.36.4") // 17.39.4, 17.40.5
             .withClientField("deviceMake", "Apple")
             .withClientField("deviceModel", "iPhone14,5")
             .withClientField("platform", "MOBILE")
