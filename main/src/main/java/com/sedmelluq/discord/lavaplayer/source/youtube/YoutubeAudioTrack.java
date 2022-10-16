@@ -48,15 +48,14 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
     //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
 
-    try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
-      FormatWithUrl format = loadBestFormatWithUrl(httpInterface);
-      log.debug("Starting track from URL: {}", format.signedUrl);
+    FormatWithUrl format = loadBestFormatWithUrl();
+    log.debug("Starting track from URL: {}", format.signedUrl);
 
-      if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-        processStream(localExecutor, format); // perhaps this should be using the interface too?
-      } else {
-        processStatic(localExecutor, httpInterface, format);
-      }
+    if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+      processStream(localExecutor, format); // perhaps this should be using the interface too?
+    } else {
+      processStatic(localExecutor, format);
+    }
 //      try {
 //        processWithFormat(localExecutor, httpInterface, format);
 //      } catch (Exception e) {
@@ -68,7 +67,6 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 //
 //        processWithFormat(localExecutor, httpInterface, fallback);
 //      }
-    }
   }
 
 //  private void processWithFormat(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
@@ -89,8 +87,9 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 //    }
 //  }
 
-  private void processStatic(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
-    try (YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
+  private void processStatic(LocalAudioTrackExecutor localExecutor, FormatWithUrl format) throws Exception {
+    try (HttpInterface httpInterface = sourceManager.getHttpInterface();
+         YoutubePersistentHttpStream stream = new YoutubePersistentHttpStream(httpInterface, format.signedUrl, format.details.getContentLength())) {
       if (format.details.getType().getMimeType().endsWith("/webm")) {
         processDelegate(new MatroskaAudioTrack(trackInfo, stream), localExecutor);
       } else {
@@ -109,23 +108,25 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
     }
   }
 
-  private FormatWithUrl loadBestFormatWithUrl(HttpInterface httpInterface) throws Exception {
-    YoutubeTrackDetails details = sourceManager.getTrackDetailsLoader()
-        .loadDetails(httpInterface, getIdentifier(), true, sourceManager);
+  private FormatWithUrl loadBestFormatWithUrl() throws Exception {
+    try (HttpInterface httpInterface = sourceManager.getHttpInterface()) {
+      YoutubeTrackDetails details = sourceManager.getTrackDetailsLoader()
+              .loadDetails(httpInterface, getIdentifier(), true, sourceManager);
 
-    // If the error reason is "Video unavailable" details will return null
-    if (details == null) {
-      throw new FriendlyException("This video is not available", FriendlyException.Severity.COMMON, null);
+      // If the error reason is "Video unavailable" details will return null
+      if (details == null) {
+        throw new FriendlyException("This video is not available", FriendlyException.Severity.COMMON, null);
+      }
+
+      List<YoutubeTrackFormat> formats = details.getFormats(httpInterface, sourceManager.getSignatureResolver());
+
+      YoutubeTrackFormat format = findBestSupportedFormat(formats);
+
+      URI signedUrl = sourceManager.getSignatureResolver()
+              .resolveFormatUrl(httpInterface, details.getPlayerScript(), format);
+
+      return new FormatWithUrl(format, signedUrl, details.getPlayerScript());
     }
-
-    List<YoutubeTrackFormat> formats = details.getFormats(httpInterface, sourceManager.getSignatureResolver());
-
-    YoutubeTrackFormat format = findBestSupportedFormat(formats);
-
-    URI signedUrl = sourceManager.getSignatureResolver()
-        .resolveFormatUrl(httpInterface, details.getPlayerScript(), format);
-
-    return new FormatWithUrl(format, signedUrl, details.getPlayerScript());
   }
 
   @Override
