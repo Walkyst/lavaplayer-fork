@@ -30,7 +30,7 @@ import static com.sedmelluq.discord.lavaplayer.tools.Units.CONTENT_LENGTH_UNKNOW
 public class YoutubeAudioTrack extends DelegatedAudioTrack {
   private static final Logger log = LoggerFactory.getLogger(YoutubeAudioTrack.class);
 
-  private static final int MAX_RETRIES = 3;
+  private static final YoutubeClientConfig[] CLIENT_CONFIG_SEQUENCE = new YoutubeClientConfig[] { YoutubeClientConfig.ANDROID, YoutubeClientConfig.IOS };
 
   private final YoutubeAudioSourceManager sourceManager;
 
@@ -46,42 +46,36 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
   @Override
   public void process(LocalAudioTrackExecutor localExecutor) throws Exception {
-    //httpInterface.getContext().setAttribute(YoutubeHttpContextFilter.ATTRIBUTE_ANDROID_REQUEST, true);
-    try {
-      FormatWithUrl format = loadBestFormatWithUrl(YoutubeClientConfig.ANDROID);
-      log.debug("Starting track from URL: {}", format.signedUrl);
+    FormatWithUrl format = loadBestFormatWithUrl(null);
+    log.debug("Starting track from URL: {}", format.signedUrl);
 
-      if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-        processStream(localExecutor, format); // perhaps this should be using the interface too?
-      } else {
+    if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
+      processStream(localExecutor, format); // perhaps this should be using the interface too?
+    } else {
+      try {
         processStatic(localExecutor, format);
+      } catch (RuntimeException e) {
+        if (!e.getMessage().equals("Not success status code: 403")) {
+          throw e;
+        }
+
+        processStaticWithClientRetry(localExecutor);
       }
-    } catch (RuntimeException e) {
-      if (e.getMessage().equals("Not success status code: 403")) {
-        // yeah this is ugly but it's for testing
-        log.warn("Received 403 whilst trying to play track, retrying with iOS client.");
+    }
+  }
 
-        FormatWithUrl format = loadBestFormatWithUrl(YoutubeClientConfig.IOS);
-        log.debug("Starting track from URL: {}", format.signedUrl);
-
-        if (trackInfo.isStream || format.details.getContentLength() == CONTENT_LENGTH_UNKNOWN) {
-          processStream(localExecutor, format); // perhaps this should be using the interface too?
-        } else {
-          processStatic(localExecutor, format);
+  private void processStaticWithClientRetry(LocalAudioTrackExecutor localExecutor) throws Exception {
+    for (int i = 0; i < CLIENT_CONFIG_SEQUENCE.length; i++) {
+      FormatWithUrl format = loadBestFormatWithUrl(CLIENT_CONFIG_SEQUENCE[i]);
+      try {
+        processStatic(localExecutor, format);
+        return;
+      } catch (RuntimeException e) {
+        if (!e.getMessage().equals("Not success status code: 403") || i == CLIENT_CONFIG_SEQUENCE.length - 1) {
+          throw e;
         }
       }
     }
-//      try {
-//        processWithFormat(localExecutor, httpInterface, format);
-//      } catch (Exception e) {
-//        FormatWithUrl fallback = format.getFallback();
-//
-//        if (fallback == null) {
-//          throw e;
-//        }
-//
-//        processWithFormat(localExecutor, httpInterface, fallback);
-//      }
   }
 
 //  private void processWithFormat(LocalAudioTrackExecutor localExecutor, HttpInterface httpInterface, FormatWithUrl format) throws Exception {
