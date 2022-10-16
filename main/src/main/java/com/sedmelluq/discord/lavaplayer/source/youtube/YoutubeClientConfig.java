@@ -19,23 +19,28 @@ public class YoutubeClientConfig {
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
             .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
             .withClientField("osName", "Android")
-            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion);
-            //.withClientField("platform", "MOBILE")
-            //.withClientField("hl", "en-GB")
-            //.withClientField("gl", "US")
-            //.withClientUserAgent("com.google.android.youtube/17.39.35 (Linux; U; Android 11) gzip"); // perhaps this should be set in the headers?
+            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion)
+            .withClientField("platform", "MOBILE")
+            .withClientField("hl", "en-US")
+            .withClientField("gl", "US")
+            .withUserField("lockedSafetyMode", false);
 
     public static YoutubeClientConfig TV_EMBEDDED = new YoutubeClientConfig()
             .withClientField("clientName", "TVHTML5_SIMPLY_EMBEDDED_PLAYER")
             .withClientField("clientVersion", "2.0");
+            // platform TV
 
     public static YoutubeClientConfig WEB = new YoutubeClientConfig()
             .withClientField("clientName", "WEB")
             .withClientField("clientVersion", "2.20220801.00.00");
+            // platform DESKTOP
 
     public static YoutubeClientConfig MUSIC = new YoutubeClientConfig()
             .withClientField("clientName", "WEB_REMIX")
             .withClientField("clientVersion", "1.20220727.01.00");
+
+    // root.cpn => content playback nonce, a-zA-Z0-9-_ (16 characters)
+    // contextPlaybackContext.refer => url (video watch URL?)
 
     private String userAgent;
 
@@ -85,10 +90,6 @@ public class YoutubeClientConfig {
         return this;
     }
 
-    public String toJsonString() {
-        return JsonWriter.string().object(root).done();
-    }
-
     public YoutubeClientConfig withRootField(String key, Object value) {
         root.put(key, value);
         return this;
@@ -99,6 +100,17 @@ public class YoutubeClientConfig {
         Map<String, Object> client = (Map<String, Object>) context.computeIfAbsent("client", __ -> new HashMap<String, Object>());
         client.put(key, value);
         return this;
+    }
+
+    public YoutubeClientConfig withUserField(String key, Object value) {
+        Map<String, Object> context = (Map<String, Object>) root.computeIfAbsent("context", __ -> new HashMap<String, Object>());
+        Map<String, Object> user = (Map<String, Object>) context.computeIfAbsent("user", __ -> new HashMap<String, Object>());
+        user.put(key, value);
+        return this;
+    }
+
+    public String toJsonString() {
+        return JsonWriter.string().object(root).done();
     }
 
     public enum AndroidVersion {
