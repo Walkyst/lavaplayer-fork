@@ -20,7 +20,7 @@ public class YoutubeClientConfig {
             .withClientField("clientVersion", ANDROID_CLIENT_VERSION)
             .withClientField("androidSdkVersion", DEFAULT_ANDROID_VERSION.getSdkVersion())
             .withClientField("osName", "Android")
-            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.osVersion);
+            .withClientField("osVersion", DEFAULT_ANDROID_VERSION.getOsVersion());
 //            .withClientField("platform", "MOBILE")
 //            .withClientField("hl", "en-US")
 //            .withClientField("gl", "US")
