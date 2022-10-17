@@ -30,7 +30,7 @@ import static com.sedmelluq.discord.lavaplayer.tools.Units.CONTENT_LENGTH_UNKNOW
 public class YoutubeAudioTrack extends DelegatedAudioTrack {
   private static final Logger log = LoggerFactory.getLogger(YoutubeAudioTrack.class);
 
-  public static final YoutubeClientConfig[] CLIENT_CONFIG_SEQUENCE = new YoutubeClientConfig[] { YoutubeClientConfig.ANDROID, YoutubeClientConfig.IOS };
+  public static YoutubeClientConfig[] CLIENT_CONFIG_SEQUENCE = new YoutubeClientConfig[] { YoutubeClientConfig.ANDROID, YoutubeClientConfig.IOS };
 
   private final YoutubeAudioSourceManager sourceManager;
 
