@@ -32,59 +32,64 @@ public class AudioConfiguration {
     return resamplingQuality;
   }
 
-  public void setResamplingQuality(ResamplingQuality resamplingQuality) {
+  public AudioConfiguration setResamplingQuality(ResamplingQuality resamplingQuality) {
     this.resamplingQuality = resamplingQuality;
+    return this;
   }
 
   public int getOpusEncodingQuality() {
     return opusEncodingQuality;
   }
 
-  public void setOpusEncodingQuality(int opusEncodingQuality) {
+  public AudioConfiguration setOpusEncodingQuality(int opusEncodingQuality) {
     this.opusEncodingQuality = Math.max(0, Math.min(opusEncodingQuality, OPUS_QUALITY_MAX));
+    return this;
   }
 
   public AudioDataFormat getOutputFormat() {
     return outputFormat;
   }
 
-  public void setOutputFormat(AudioDataFormat outputFormat) {
+  public AudioConfiguration setOutputFormat(AudioDataFormat outputFormat) {
     this.outputFormat = outputFormat;
+    return this;
   }
 
   public boolean isFilterHotSwapEnabled() {
     return filterHotSwapEnabled;
   }
 
-  public void setFilterHotSwapEnabled(boolean filterHotSwapEnabled) {
+  public AudioConfiguration setFilterHotSwapEnabled(boolean filterHotSwapEnabled) {
     this.filterHotSwapEnabled = filterHotSwapEnabled;
+    return this;
   }
 
   public AudioFrameBufferFactory getFrameBufferFactory() {
     return frameBufferFactory;
   }
 
-  public void setFrameBufferFactory(AudioFrameBufferFactory frameBufferFactory) {
+  public AudioConfiguration setFrameBufferFactory(AudioFrameBufferFactory frameBufferFactory) {
     this.frameBufferFactory = frameBufferFactory;
+    return this;
   }
 
   /**
    * @return A copy of this configuration.
    */
   public AudioConfiguration copy() {
-    AudioConfiguration copy = new AudioConfiguration();
-    copy.setResamplingQuality(resamplingQuality);
-    copy.setOpusEncodingQuality(opusEncodingQuality);
-    copy.setOutputFormat(outputFormat);
-    copy.setFilterHotSwapEnabled(filterHotSwapEnabled);
-    copy.setFrameBufferFactory(frameBufferFactory);
-    return copy;
+    return new AudioConfiguration()
+            .setResamplingQuality(resamplingQuality)
+            .setOpusEncodingQuality(opusEncodingQuality)
+            .setOutputFormat(outputFormat)
+            .setFilterHotSwapEnabled(filterHotSwapEnabled)
+            .setFrameBufferFactory(frameBufferFactory);
   }
 
   /**
    * Resampling quality levels
    */
   public enum ResamplingQuality {
+    HIGHEST,
     HIGH,
     MEDIUM,
     LOW

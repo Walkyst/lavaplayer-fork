@@ -73,6 +73,8 @@ public class ResamplingPcmAudioFilter implements FloatPcmAudioFilter {
 
   private static SampleRateConverter.ResamplingType getResamplingType(AudioConfiguration.ResamplingQuality quality) {
     switch (quality) {
+      case HIGHEST:
+        return SampleRateConverter.ResamplingType.SINC_BEST_QUALITY;
       case HIGH:
         return SampleRateConverter.ResamplingType.SINC_MEDIUM_QUALITY;
       case MEDIUM:
