@@ -1,7 +1,6 @@
 package com.sedmelluq.discord.lavaplayer.source.soundcloud;
 
 import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -26,21 +25,22 @@ public class DefaultSoundCloudDataReader implements SoundCloudDataReader {
   }
 
   @Override
-  public AudioTrackInfo readTrackInfo(JsonBrowser trackData, String identifier) {
-    String title = trackData.get("title").safeText();
+  public SoundCloudAudioTrackInfo readTrackInfo(JsonBrowser trackData, String identifier) {
     Integer duration = trackData.get("full_duration").as(Integer.class);
-    if("SUB_HIGH_TIER".equals(trackData.get("monetization_model").safeText())) {
-      title = "SoundCloud GO+ Demo: " + title;
+    boolean isDemo = false;
+    if ("SUB_HIGH_TIER".equals(trackData.get("monetization_model").safeText())) {
       duration = 30000;
+      isDemo = true;
     }
 
-    return new AudioTrackInfo(
-        title,
-        trackData.get("user").get("username").safeText(),
-        duration,
-        identifier,
-        false,
-        trackData.get("permalink_url").text()
+    return new SoundCloudAudioTrackInfo(
+            trackData.get("title").safeText(),
+            trackData.get("user").get("username").safeText(),
+            duration,
+            identifier,
+            false,
+            trackData.get("permalink_url").text(),
+            isDemo
     );
   }
 

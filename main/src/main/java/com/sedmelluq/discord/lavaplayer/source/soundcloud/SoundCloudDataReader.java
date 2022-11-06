@@ -1,7 +1,6 @@
 package com.sedmelluq.discord.lavaplayer.source.soundcloud;
 
 import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import java.util.List;
 
 public interface SoundCloudDataReader {
@@ -11,7 +10,7 @@ public interface SoundCloudDataReader {
 
   boolean isTrackBlocked(JsonBrowser trackData);
 
-  AudioTrackInfo readTrackInfo(JsonBrowser trackData, String identifier);
+  SoundCloudAudioTrackInfo readTrackInfo(JsonBrowser trackData, String identifier);
 
   List<SoundCloudTrackFormat> readTrackFormats(JsonBrowser trackData);
 
