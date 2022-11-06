@@ -22,15 +22,22 @@ public class DefaultSoundCloudDataReader implements SoundCloudDataReader {
 
   @Override
   public boolean isTrackBlocked(JsonBrowser trackData) {
-    return "BLOCK".equals(trackData.get("policy").safeText());
+    return "BLOCK".equals(trackData.get("policy").safeText()) || "SUB_HIGH_TIER".equals(trackData.get("monetization_model").safeText());
   }
 
   @Override
   public AudioTrackInfo readTrackInfo(JsonBrowser trackData, String identifier) {
+    String title = trackData.get("title").safeText();
+    Integer duration = trackData.get("full_duration").as(Integer.class);
+    if("SUB_HIGH_TIER".equals(trackData.get("monetization_model").safeText())) {
+      title = "SoundCloud GO+ Demo: " + title;
+      duration = 30000;
+    }
+
     return new AudioTrackInfo(
-        trackData.get("title").safeText(),
+        title,
         trackData.get("user").get("username").safeText(),
-        trackData.get("full_duration").as(Integer.class),
+        duration,
         identifier,
         false,
         trackData.get("permalink_url").text()
