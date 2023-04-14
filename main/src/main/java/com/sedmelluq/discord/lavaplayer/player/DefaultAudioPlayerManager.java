@@ -34,6 +34,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -183,6 +184,11 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
   }
 
   @Override
+  public List<AudioSourceManager> getSourceManagers() {
+    return Collections.unmodifiableList(sourceManagers);
+  }
+
+  @Override
   public Future<Void> loadItem(final AudioReference reference, final AudioLoadResultHandler resultHandler) {
     try {
       return trackInfoExecutorService.submit(createItemLoader(reference, resultHandler));
@@ -260,15 +266,22 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
 
   @Override
   public DecodedTrackHolder decodeTrack(MessageInput stream) throws IOException {
-    DataInput input = stream.nextMessage();
+    DataInputStream input = stream.nextMessage();
     if (input == null) {
       return null;
     }
 
     int version = (stream.getMessageFlags() & TRACK_INFO_VERSIONED) != 0 ? (input.readByte() & 0xFF) : 1;
 
-    AudioTrackInfo trackInfo = new AudioTrackInfo(input.readUTF(), input.readUTF(), input.readLong(), input.readUTF(),
-        input.readBoolean(), version >= 2 ? DataFormatTools.readNullableText(input) : null);
+    AudioTrackInfo trackInfo = new AudioTrackInfo(
+        input.readUTF(),
+        input.readUTF(),
+        input.readLong(),
+        input.readUTF(),
+        input.readBoolean(),
+        version >= 2 ? DataFormatTools.readNullableText(input) : null
+    );
+    stream.skipRemainingVersionedFields(input);
     AudioTrack track = decodeTrackDetails(trackInfo, input);
     long position = input.readLong();
 

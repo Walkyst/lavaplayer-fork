@@ -5,7 +5,7 @@ plugins {
 }
 
 val moduleName = "lavaplayer"
-version = "1.3.98.4-original"
+version = "1.4.0-original"
 
 dependencies {
   api("com.sedmelluq:lava-common:1.1.2")
@@ -22,6 +22,7 @@ dependencies {
 
   implementation("org.jsoup:jsoup:1.15.3")
   implementation("net.iharder:base64:2.3.9")
+  implementation("org.json:json:20220924")
 
   testImplementation("org.codehaus.groovy:groovy:3.0.12")
   testImplementation("org.spockframework:spock-core:2.2-groovy-2.5")
