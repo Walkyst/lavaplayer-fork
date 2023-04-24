@@ -15,6 +15,12 @@ dependencies {
   api("org.slf4j:slf4j-api:1.7.36")
 
   api("org.apache.httpcomponents:httpclient:4.5.14")
+  constraints {
+    implementation("commons-codec:commons-codec:1.15") {
+      because("Cxeb68d52e-5509 at version 1.11 and below.")
+    }
+  }
+
   implementation("commons-io:commons-io:2.11.0")
 
   api("com.fasterxml.jackson.core:jackson-core:2.12.7")
